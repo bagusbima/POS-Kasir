@@ -1,13 +1,15 @@
-import Axios from 'axios';
+import axios from 'axios';
 
-const axios = Axios.create({
-    baseURL: 'http://localhost:8000', 
+const instance = axios.create({
+    baseURL: 'http://localhost:8000',
+    // withCredentials wajib true agar cookie laravel_session & XSRF-TOKEN disimpan browser
+    withCredentials: true, 
+    // withXSRFToken wajib true di Axios versi terbaru agar token dikirim balik ke Laravel
+    withXSRFToken: true,   
     headers: {
-        'X-Requested-With': 'XMLHttpRequest',
         'Accept': 'application/json',
-    },
-    withCredentials: true,
-    withXSRFToken: true,
+        'Content-Type': 'application/json',
+    }
 });
 
-export default axios;
+export default instance;

@@ -1,6 +1,8 @@
 "use client";
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation'; // 🌟 TAMBAHKAN useRouter
+import { useAuth } from '@/hooks/useAuth';
+import axios from "@/lib/axios"; // 🌟 TAMBAHKAN AXIOS
 import { 
     LayoutDashboard, 
     Package, 
@@ -12,6 +14,8 @@ import {
 
 export default function Sidebar() {
     const pathname = usePathname();
+    const router = useRouter(); // 🌟 INISIALISASI ROUTER
+    const { logout } = useAuth();
 
     const menuItems = [
         { name: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard size={20} /> },
@@ -19,6 +23,24 @@ export default function Sidebar() {
         { name: 'Produk', href: '/products', icon: <Package size={20} /> },
         { name: 'Riwayat', href: '/transactions', icon: <History size={20} /> },
     ];
+
+    // 🌟 FUNGSI LOGOUT BARU
+    const handleLogout = async () => {
+        if (!confirm("Apakah Anda yakin ingin keluar dari GUSBIM POS?")) return;
+
+        try {
+            // Panggil fungsi logout bawaan hook. 
+            // Biasanya hook ini sudah otomatis menembak API Laravel & menghapus token di browser
+            await logout(); 
+        } catch (err) {
+            console.error("Gagal logout melalui hook:", err);
+        } finally {
+            // Jaga-jaga bersihkan sisa token dan lempar ke login
+            localStorage.removeItem("token");
+            alert("Anda telah berhasil logout.");
+            router.push("/login");
+        }
+    };
 
     return (
         <aside className="fixed left-0 top-0 h-screen w-64 bg-gray-900 border-r border-gray-800 flex flex-col p-6 z-50">
@@ -53,7 +75,11 @@ export default function Sidebar() {
 
             {/* Logout - Bagian Bawah */}
             <div className="pt-6 border-t border-gray-800">
-                <button className="flex items-center gap-3 px-4 py-3 w-full text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all">
+                {/* 🌟 PASANG EVENT onClick={handleLogout} DI SINI */}
+                <button 
+                    onClick={handleLogout}
+                    className="flex items-center gap-3 px-4 py-3 w-full text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all"
+                >
                     <LogOut size={20} />
                     <span className="font-medium">Keluar</span>
                 </button>
