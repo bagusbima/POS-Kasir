@@ -4,24 +4,25 @@ import { useRouter } from 'next/navigation';
 export const useAuth = () => {
     const router = useRouter();
     
-    const login = async (data: any) => {
-        try {
-            await axios.get('/sanctum/csrf-cookie');
+    const login = async ({ email, password }: { email: string; password: string }) => {
+    try {
+        // Tembak API login biasa (tanpa perlu memanggil /sanctum/csrf-cookie terlebih dahulu)
+        const response = await axios.post('/api/login', { email, password });
+        
+        // Sesuaikan dengan response dari Laravel AuthController yang kita buat kemarin
+        const token = response.data.token;
+        const user = response.data.user;
 
-            await axios.post('/login', data, {
-                headers: {
-                    'Accept': 'application/json',
-                },
-            });
+        // Simpan token ke localStorage
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
 
-            // WAJIB ADA BARIS INI: Untuk membuat penanda lokal bagi Next.js Middleware
-            document.cookie = "is_logged_in=true; path=/; max-age=86400; SameSite=Lax";
-
-            router.push('/dashboard');
-        } catch (error: any) {
-            console.log(error.response?.data); 
-            alert('Login gagal! ' + (error.response?.data?.message || ''));
-        }
+        // Arahkan ke dashboard
+        router.push('/dashboard');
+    } catch (error) {
+        console.error("Login gagal:", error);
+        alert("Login gagal! Periksa kembali akun Anda.");
+    }
     };
 
     const logout = async () => {
